@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyruPay - Pembayaran QR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Outfit&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a1f2b);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #00ffe5;
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 8px #00fff7);
+    }
+
+    .qris {
+      width: 100%;
+      max-width: 280px;
+      border-radius: 12px;
+      border: 3px solid #00fff7;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .qris:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+    }
+
+    .pay-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .pay-box:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+
+    .pay-box img {
+      width: 36px;
+      height: 36px;
+    }
+
+    .pay-info {
+      flex: 1;
+    }
+
+    .pay-info strong {
+      color: #00fff0;
+      font-size: 1.1em;
+    }
+
+    .pay-info p {
+      margin: 2px 0 0;
+      color: #ddd;
+    }
+
+    .copy-btn {
+      background: #00ffc3;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #000;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: #02e3bd;
+      transform: scale(1.05);
+      box-shadow: 0 0 8px #00ffe5;
+    }
+
+    footer {
+      margin-top: 25px;
+      font-size: 0.85em;
+      color: #aaa;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0e1a2b; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" data-aos="zoom-in">
+    <img src="https://cdn-icons-png.flaticon.com/512/6482/6482355.png" alt="Logo" class="logo" />
+    <h2>CyruPay - Bayar via QR</h2>
+    <img src="https://files.catbox.moe/4xaf4m.jpg" alt="QRIS" class="qris" />
+
+    <div class="pay-box" data-aos="fade-up" data-aos-delay="200">
+      <img src="https://files.catbox.moe/4xaf4m.jpg" alt="Dana">
+      <div class="pay-info">
+        <strong>Dana</strong>
+        <p id="dana">0812-3456-7890</p>
+      </div>
+      <button class="copy-btn" onclick="copyToClipboard('dana')">Salin</button>
+    </div>
+
+    <div class="pay-box" data-aos="fade-up" data-aos-delay="400">
+      <img src="https://files.catbox.moe/4xaf4m.jpg" alt="Gopay">
+      <div class="pay-info">
+        <strong>GoPay</strong>
+        <p id="gopay">0857-6543-2100</p>
+      </div>
+      <button class="copy-btn" onclick="copyToClipboard('gopay')">Salin</button>
+    </div>
+
+    <footer>© 2025 CyruPay • Aman dan Cepat</footer>
+  </div>
+
+  <script>
+    AOS.init();
+
+    function copyToClipboard(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        new Audio('https://www.soundjay.com/buttons/sounds/button-29.mp3').play();
+        alert('Nomor berhasil disalin!');
+      });
+    }
+  </script>
+</body>
+</html>

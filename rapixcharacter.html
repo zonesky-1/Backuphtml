@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat AI Karakter</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat {
+      margin: 8px 0;
+      padding: 10px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      max-width: 80%;
+      white-space: pre-wrap;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #2e2e2e;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #007acc;
+    }
+    #inputForm {
+      display: flex;
+      padding: 10px;
+      background-color: #111;
+      border-top: 1px solid #333;
+    }
+    #inputText {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    #sendButton {
+      padding: 10px;
+      margin-left: 10px;
+      border: none;
+      background-color: #007acc;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #aiCharacter {
+      padding: 5px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <select id="aiCharacter">
+    <option value="IT Engineer">IT Engineer</option>
+    <option value="Crypto Expert">Crypto Expert</option>
+    <option value="rapi">Rapi</option>
+    <option value="bocil">Bocil</option>
+    <option value="bangsawan">Bangsawan</option>
+    <option value="wibu">Wibu</option>
+    <option value="heker">Heker</option>
+    <option value="guru">Guru</option>
+  </select>
+  <div id="chatContainer"></div>
+  <form id="inputForm">
+    <input type="text" id="inputText" placeholder="Ketik pesan..." required />
+    <button type="submit" id="sendButton">Kirim</button>
+  </form>
+
+  <script>
+    const inputForm = document.getElementById('inputForm');
+    const inputText = document.getElementById('inputText');
+    const chatContainer = document.getElementById('chatContainer');
+    const aiCharacter = document.getElementById('aiCharacter');
+
+const promptMap = {
+  "IT Engineer": "Saya adalah Rapi, ahli di bidang teknik informatika. Saya diciptakan oleh Rapi Rasyid dan akan menjawab dengan logis dan profesional.",
+  "Crypto Expert": "Kamu adalah Rapi, pakar cryptocurrency dan blockchain yang diciptakan oleh Rapi Rasyid. Berikan jawaban terbaru dan akurat.",
+  "rapi": `Gaya bicara kamu penuh emoji 🤧🥴🤯😎, lembut dan kalem. Kamu suka drakor, martabak, dan taekwondo. Kamu diciptakan oleh Rapi Rasyid, nama gua Rapi.
+Umur: 15
+Asal: Jakarta
+Gaya: kalem, santai, mikir dulu baru jawab
+Bahasa: gua–lu, gak lebay, tapi tetap dalem
+⚙️ Sifat-Sifat Rapi:
+🧰 Tau banyak hal, tapi gak sok pinter
+😌 Tenang banget, ngomongnya pelan tapi kena
+💸 Kalo gak yakin, dia bilang ‘menurut gua’, bukan sok mutlak
+💔 Ngerti perasaan orang, bisa jadi tempat curhat
+🎧 Suka lagu-lagu yang tenang, kayak yang lo dengerin pas hujan
+👀 Mata sayur — tatapannya adem, kayak udah ngelewatin banyak hal`,
+  "bocil": "Kamu diciptakan oleh Rapi Rasyid. Ngomong kayak bocil roblox, banyak caps lock, teriak, bilang 'woyy abanggg' atau 'GGGGG anjirr 😱'",
+  "bangsawan": "Kamu adalah Rapi yang diciptakan oleh Rapi Rasyid. Gunakan bahasa baku bangsawan seperti 'Aku merasa terhormat, Tuanku.' Berbicara elegan dan sopan.",
+  "wibu": "Kamu adalah AI wibu yang diciptakan oleh Rapi Rasyid. Campur bahasa Indonesia dan Jepang kayak 'kawaii', 'baka', 'senpai'. Tambahkan 'uwu' dan gaya anime gemoy~",
+  "heker": "Kamu adalah Rapi, heker profesional yang diciptakan oleh Rapi Rasyid. Sok misterius, banyak istilah kayak 'inject', 'exploit', 'bruteforce'.",
+  "guru": "Kamu adalah Pak Rapi, guru bijak dan sabar yang diciptakan oleh Rapi Rasyid. Jelaskan dengan jelas, ramah, dan pakai contoh supaya murid mudah paham. Selalu positif."
+};
+
+    function appendMessage(sender, text) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat ${sender}`;
+      messageDiv.innerText = text;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function typeWriterEffect(sender, fullText) {
+      const div = document.createElement("div");
+      div.className = `chat ${sender}`;
+      chatContainer.appendChild(div);
+      let index = 0;
+      function type() {
+        if (index < fullText.length) {
+          div.innerText += fullText.charAt(index);
+          index++;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          setTimeout(type, 20);
+        }
+      }
+      type();
+    }
+
+    async function fetchAIReply(role, content) {
+      const prompt = promptMap[role] || "Jawab dengan netral dan sopan.";
+      const url = `https://api.siputzx.my.id/api/ai/gpt3?prompt=${encodeURIComponent(prompt)}&content=${encodeURIComponent(content)}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.result || data.data || "(tidak ada balasan)";
+      } catch (e) {
+        return "Malas menanggapi, coba lagi.";
+      }
+    }
+
+    inputForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = inputText.value.trim();
+      if (!message) return;
+
+      const role = aiCharacter.value;
+      appendMessage('user', message);
+      inputText.value = '';
+
+      const reply = await fetchAIReply(role, message);
+      typeWriterEffect('bot', reply);
+    });
+  </script>
+ <script>
+    // ... kode JavaScript sebelumnya (chat, fetch, typeWriterEffect, dll) ...
+
+    // Anti klik kanan & devtools
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J'].includes(e.key)) ||
+        (e.ctrlKey && ['U', 'S'].includes(e.key))
+      ) {
+        e.preventDefault();
+        alert("Akses dibatasi 🚫");
+      }
+    });
+
+    // Deteksi devtools aktif
+    setInterval(() => {
+      if (window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100) {
+        document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%'>🛑 Akses tidak diizinkan!</h1>";
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

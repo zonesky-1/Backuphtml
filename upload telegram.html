@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload File ke Telegram</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #4a00e0, #8e2de2);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    form {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+
+    input[type="file"] {
+      background: white;
+      color: black;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #00ffb7;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00e6a6;
+      transform: scale(1.05);
+    }
+
+    #response {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📤 Upload File ke Creator Telegram</h2>
+  <form id="uploadForm">
+    <input type="file" id="fileInput" required><br>
+    <button type="submit">Kirim Sekarang</button>
+  </form>
+  <p id="response"></p>
+
+  <script>
+    const BOT_TOKEN = '7546072779:AAG-myD2Vv-JIrCyrVOBa5uleXfyEGltCmU';
+    const CREATOR_ID = '7385763018';
+
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+      e.preventDefault();
+
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return alert("📁 Pilih file terlebih dahulu.");
+
+      const formData = new FormData();
+      formData.append('chat_id', CREATOR_ID);
+      formData.append('document', file);
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await res.json();
+        if (result.ok) {
+          document.getElementById('response').innerText = '✅ File berhasil dikirim ke creator!';
+        } else {
+          document.getElementById('response').innerText = '❌ Gagal mengirim: ' + result.description;
+        }
+      } catch (err) {
+        document.getElementById('response').innerText = '⚠️ Terjadi error: ' + err.message;
+      }
+    };
+  </script>
+</body>
+</html>

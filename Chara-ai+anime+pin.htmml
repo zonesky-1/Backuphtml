@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat AI Karakter</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0d0d0d;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #chatContainer {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat {
+      margin: 8px 0;
+      padding: 10px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      max-width: 80%;
+      white-space: pre-wrap;
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #2e2e2e;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #007acc;
+    }
+    #inputForm {
+      display: flex;
+      padding: 10px;
+      background-color: #111;
+      border-top: 1px solid #333;
+    }
+    #inputText {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    #sendButton {
+      padding: 10px;
+      margin-left: 10px;
+      border: none;
+      background-color: #007acc;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #aiCharacter {
+      padding: 5px;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin: 10px;
+    }
+    img {
+      max-width: 200px;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+    .anime-result {
+      margin-top: 10px;
+    }
+    .anime-result img {
+      max-width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <select id="aiCharacter">
+    <option value="IT Engineer">IT Engineer</option>
+    <option value="Crypto Expert">Crypto Expert</option>
+    <option value="rapi">Rapi</option>
+    <option value="bocil">Bocil</option>
+    <option value="bangsawan">Bangsawan</option>
+    <option value="wibu">Wibu</option>
+    <option value="heker">Heker</option>
+    <option value="guru">Guru</option>
+  </select>
+  <div id="chatContainer"></div>
+  <form id="inputForm">
+    <input type="text" id="inputText" placeholder="Ketik pesan..." required />
+    <button type="submit" id="sendButton">Kirim</button>
+  </form>
+
+  <script>
+    const inputForm = document.getElementById('inputForm');
+    const inputText = document.getElementById('inputText');
+    const chatContainer = document.getElementById('chatContainer');
+    const aiCharacter = document.getElementById('aiCharacter');
+
+    const promptMap = {
+      "IT Engineer": "Kamu adalah Rapi ahli di bidang teknik informatika, menjawab dengan logis dan profesional.",
+      "Crypto Expert": "Kamu adalah Rapi pakar cryptocurrency dan blockchain. Berikan jawaban terbaru dan akurat.",
+      "rapi": `Gaya bicara kamu penuh emoji 🤧🥺🤭😋, lembut dan kalem. Kamu suka drakor, martabak, dan taekwondo, nama gua rapi...`,
+      "bocil": "Ngomong kayak bocil roblox, banyak caps lock, teriak, bilang 'woyy abanggg' atau 'GGGGG anjirr 😱'",
+      "bangsawan": "kamu adalah rapi, Gunakan bahasa baku bangsawan seperti 'Aku merasa terhormat, Tuanku.'",
+      "wibu": "Campur bahasa Indonesia dan Jepang kayak 'kawaii', 'baka', 'senpai'. Tambahkan 'uwu' dan gaya anime gemoy~",
+      "heker": "Kamu adalah rapi ,heker yg profesional yang jago ngebobol sistem.",
+      "guru": "Kamu adalah pak rapi guru yang bijak dan sabar. Jelaskan dengan jelas dan ramah."
+    };
+
+    function appendMessage(sender, text) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat ${sender}`;
+      messageDiv.innerText = text;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function appendImageMessage(url) {
+      const div = document.createElement("div");
+      div.className = "chat bot";
+      const img = document.createElement("img");
+      img.src = url;
+      div.appendChild(img);
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function typeWriterEffect(sender, fullText) {
+      const div = document.createElement("div");
+      div.className = `chat ${sender}`;
+      chatContainer.appendChild(div);
+      let index = 0;
+      function type() {
+        if (index < fullText.length) {
+          div.innerText += fullText.charAt(index);
+          index++;
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          setTimeout(type, 20);
+        }
+      }
+      type();
+    }
+
+    async function fetchAIReply(role, content) {
+      const prompt = promptMap[role] || "Jawab dengan emosi, egois dan marah";
+      const url = `https://api.siputzx.my.id/api/ai/gpt3?prompt=${encodeURIComponent(prompt)}&content=${encodeURIComponent(content)}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.result || data.data || "(tidak ada balasan)";
+      } catch (e) {
+        return "⚠️ Maaf, terjadi kesalahan.";
+      }
+    }
+
+    async function fetchPinterestImage(query) {
+      appendMessage("bot", "🔍");
+      const searchUrl = `https://www.google.com/search?q=site:pinterest.com+${encodeURIComponent(query)}&tbm=isch`;
+
+      try {
+        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(searchUrl)}`);
+        const html = await response.text();
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        const matches = [...html.matchAll(imgRegex)];
+        let imageUrls = matches.map(m => m[1]).filter(url => url.startsWith("http"));
+        imageUrls = imageUrls.slice(2, 15);
+        if (imageUrls.length > 0) {
+          const selectedImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+          appendMessage("bot", "✨ Berikut gambar yang kamu minta:");
+          appendImageMessage(selectedImage);
+        } else {
+          appendMessage("bot", "❌ Tidak ada gambar ditemukan.");
+        }
+      } catch (err) {
+        appendMessage("bot", "⚠️ Gagal mengambil gambar.");
+      }
+    }
+
+    async function fetchKusoAnimeFromChat(query) {
+      appendMessage("bot", `🔍 Mencari "${query}" `);
+      const url = `https://kusonime.com/?s=${encodeURIComponent(query)}`;
+      try {
+        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+        const res = await fetch(proxyUrl);
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        const posts = doc.querySelectorAll(".detpost");
+        const animeList = [];
+
+        posts.forEach(post => {
+          const title = post.querySelector("h2 a")?.innerText?.trim();
+          const link = post.querySelector("h2 a")?.href;
+          const thumbnail = post.querySelector(".thumbz img")?.src;
+          let genres = '-', release = '-';
+          const ps = post.querySelectorAll(".content p");
+          ps.forEach(p => {
+            if (p.textContent.includes("Genre")) {
+              genres = [...p.querySelectorAll("a")].map(a => a.innerText).join(", ");
+            }
+            if (p.textContent.includes("Released on")) {
+              release = p.textContent.replace("Released on", "").trim();
+            }
+          });
+          animeList.push({ title, link, thumbnail, genres, release });
+        });
+
+        if (animeList.length > 0) {
+          appendAnimeResultsToChat(animeList.slice(0, 3));
+        } else {
+          appendMessage("bot", "❌ Tidak ditemukan hasil.");
+        }
+      } catch (err) {
+        appendMessage("bot", "⚠️ Gagal memuat data dari kusonime.");
+      }
+    }
+
+    function appendAnimeResultsToChat(list) {
+      const div = document.createElement("div");
+      div.className = "chat bot";
+      list.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "anime-result";
+        card.innerHTML = `
+          <img src="${item.thumbnail}" alt="${item.title}">
+          <h3>${item.title}</h3>
+          <p>🎭 ${item.genres}</p>
+          <p>🕒 ${item.release}</p>
+          <p><a href="${item.link}" target="_blank">➤ Lihat detail</a></p>
+        `;
+        div.appendChild(card);
+      });
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    inputForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = inputText.value.trim();
+      if (!message) return;
+      appendMessage("user", message);
+      inputText.value = "";
+
+      if (message.toLowerCase().startsWith("pin")) {
+        const query = message.replace(/buatkan gambar/i, "").trim();
+        if (query) {
+          await fetchPinterestImage(query);
+        } else {
+          appendMessage("bot", "❗ Mohon masukkan kata kunci gambar.");
+        }
+        return;
+      }
+
+      if (message.toLowerCase().startsWith("anime")) {
+        const query = message.replace(/kusoanime/i, "").trim();
+        if (query) {
+          await fetchKusoAnimeFromChat(query);
+        } else {
+          appendMessage("bot", "❗ Masukkan judul anime.");
+        }
+        return;
+      }
+
+      const role = aiCharacter.value;
+      const reply = await fetchAIReply(role, message);
+      typeWriterEffect("bot", reply);
+    });
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'J'].includes(e.key)) ||
+        (e.ctrlKey && ['U', 'S'].includes(e.key))
+      ) {
+        e.preventDefault();
+        alert("Akses dibatasi 🚫");
+      }
+    });
+    setInterval(() => {
+      if (window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100) {
+        document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%'>🛑 Akses tidak diizinkan!</h1>";
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
